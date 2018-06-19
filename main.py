@@ -7,14 +7,21 @@ import time
 def fnPDF_FindText(pdfDoc, words):
     # xfile : the PDF file in which to look
     # xString : the string to look for
+    print(str(0) + '%')
     res = defaultdict(lambda: set())
-    for i in range(0, pdfDoc.getNumPages()):
+    num_pages = pdfDoc.getNumPages()
+    prev_prc = 0
+    for i in range(0, num_pages):
         content = ""
         content += pdfDoc.getPage(i).extractText()
+        content = re.sub(r'\s+', ' ', content)
         for word in words:
             if word in content:
                 res[word].add(i + 1)
-        print(i)
+        prc = (i*100.0)/num_pages
+        if prc > (prev_prc + 1) * 25:
+            prev_prc += 1
+            print(str(prev_prc*25) + '%')
     return res
 
 
@@ -54,7 +61,7 @@ def main():
     pdfFileObj.close()
     with open('results.txt', 'w') as f:
         for k in results:
-            pages = results[k]
+            pages = sorted(list(results[k]))
             if len(pages) != 0:
                 f.write(k + ', ' + ', '.join(map(str, pages)) + '\n')
 
