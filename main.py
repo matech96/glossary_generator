@@ -2,6 +2,7 @@ import PyPDF2
 import re
 from collections import defaultdict
 import time
+import unidecode
 
 
 def fnPDF_FindText(pdfDoc, words):
@@ -12,12 +13,11 @@ def fnPDF_FindText(pdfDoc, words):
     num_pages = pdfDoc.getNumPages()
     prev_prc = 0
     for i in range(0, num_pages):
-        content = ""
-        content += pdfDoc.getPage(i).extractText()
+        content = unidecode.unidecode(pdfDoc.getPage(i).extractText())
         content = re.sub(r'\s+', ' ', content)
         for word in words:
             if word in content:
-                res[word].add(i + 1)
+                res[word].add(i + 5)
         prc = (i*100.0)/num_pages
         if prc > (prev_prc + 1) * 25:
             prev_prc += 1
@@ -55,7 +55,8 @@ def main():
 
     print(len(words))
     print('-----')
-    pdfFileObj = open('Deng_06-14.pdf', 'rb')
+    filename = 'Teng+Xiaoping+08-24+pinjin+szerk+GA.pdf'
+    pdfFileObj = open(filename, 'rb')
     pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
     results = fnPDF_FindText(pdfReader, words)
     pdfFileObj.close()
