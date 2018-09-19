@@ -1,0 +1,8 @@
+[PDF]
+PDFFileName = Teng Xiaoping 08-24 pinjin szerk GA.pdf # a pdf fájl neve.
+Offest = 5 # Mennyivel van elcsúszva az oldalszámozás?
+           # Ha nem tudod mennyi csináld a következőt:
+           # 1 - Írd az értéket 0-ra (Offest = 0)!
+           # 2 - Futtass le egy keresést!
+           # 3 - Nézd meg hogy a programm által adott oldalszámok és a pdf-ben szereplő oldalszámok között mennyi a különbség!
+           # 4 - Írd át az értéket 0-ról a különbségre!
