@@ -70,7 +70,31 @@ def main():
         for k in results:
             pages = sorted(list(results[k]))
             if len(pages) != 0:
-                f.write(k + ', ' + ', '.join(map(str, pages)) + '\n')
+                # with open(k + '.txt', 'w') as f:
+                #     for item in pages:
+                #         f.write("%s, " % item)
+                f.write(k + ': ')
+                first_page = -1
+                last_page = -1
+                for page in pages:
+                    if page != last_page + 1:
+                        print_pages(f, first_page, last_page)
+                        f.write(', ')
+                        first_page = page
+                    last_page = page
+                print_pages(f, first_page, last_page)
+                f.write('\n')
+
+
+def print_pages(f, first_page, last_page):
+    if first_page > 0:
+        if last_page != first_page:
+            page_str = str(first_page) + '-' + str(last_page)
+            f.write(page_str)
+        else:
+            page_str = str(first_page)
+            f.write(page_str)
+        # print(page_str)
 
 
 if __name__ == '__main__':
