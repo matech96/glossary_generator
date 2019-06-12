@@ -15,11 +15,11 @@ def fnPDF_FindText(pdfDoc, words, offset):
     num_pages = pdfDoc.getNumPages()
     prev_prc = 0
     for i in range(0, num_pages):
-        content = unidecode.unidecode(pdfDoc.getPage(i).extractText())
+        content = unidecode.unidecode(pdfDoc.getPage(i).extractText()).lower()
         content = re.sub(r'\s+', ' ', content)
         for word in words:
             res[word]
-            if unidecode.unidecode(word) in content:
+            if unidecode.unidecode(word).lower() in content:
                 res[word].add(i + offset)
         prc = (i*100.0)/num_pages
         if prc > (prev_prc + 1) * 25:
