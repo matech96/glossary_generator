@@ -7,8 +7,7 @@ import pdfquery
 import unidecode
 import codecs
 import configparser
-import os
-from multiprocessing import Pool
+
 
 def fnPDF_FindText(pdfDoc, words, offset):
     # xfile : the PDF file in which to look
@@ -23,24 +22,25 @@ def fnPDF_FindText(pdfDoc, words, offset):
         for word in words:
             if unidecode.unidecode(word).lower() in content:
                 res[word].add(i + offset)
-        prc = (i*100.0)/num_pages
+        prc = (i * 100.0) / num_pages
         if prc > (prev_prc + 1) * 25:
             prev_prc += 1
-            print(str(prev_prc*25) + '%')
+            print(str(prev_prc * 25) + '%')
     return res
 
 
 def pdfquery_FindText(filenamme, words, offset):
     # xfile : the PDF file in which to look
     # xString : the string to look for
-    res = defaultdict(lambda: [None]*100)
+    res = defaultdict(lambda: [None] * 100)
     pdf = pdfquery.PDFQuery(filenamme)
     page_num = 0
-    p = Pool(4)
+    # p = Pool(4)
     while True:
         try:
             pdf.load(page_num)
-            res = p.map(lambda word: pdf.pq(f'LTTextLineHorizontal:contains("{word}")'), words)
+            # res = p.map(lambda word: pdf.pq(f'LTTextLineHorizontal:contains("{word}")'), words)
+            res = [pdf.pq(f'LTTextLineHorizontal:contains("{word}")') for word in words]
             for r, word in zip(res, words):
                 if r:
                     res[word].add(page_num + offset)
@@ -50,6 +50,7 @@ def pdfquery_FindText(filenamme, words, offset):
         except StopIteration:
             break
     return res
+
 
 def raw_index_reader():
     words = []
@@ -63,6 +64,7 @@ def raw_index_reader():
             end = line[-2] != ' '
     return words
 
+
 def clean_index_reader():
     words = []
     with open('index.txt', encoding='UTF-8') as f:
@@ -70,9 +72,10 @@ def clean_index_reader():
             words.append(line.strip())
     return words
 
+
 def main():
     config = configparser.ConfigParser(inline_comment_prefixes=('#', ';'))
-    config.read_file(codecs.open("config.txt", "r", "utf8"))    
+    config.read_file(codecs.open("config.txt", "r", "utf8"))
     section = config['PDF']
     filename = section['PDFFileName']
     offset = int(section['Offest'])
