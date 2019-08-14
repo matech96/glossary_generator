@@ -2,6 +2,8 @@ import PyPDF2
 import re
 from collections import defaultdict
 import time
+
+import pdfquery
 import unidecode
 import codecs
 import configparser
@@ -18,7 +20,6 @@ def fnPDF_FindText(pdfDoc, words, offset):
         content = unidecode.unidecode(pdfDoc.getPage(i).extractText()).lower()
         content = re.sub(r'\s+', ' ', content)
         for word in words:
-            res[word]
             if unidecode.unidecode(word).lower() in content:
                 res[word].add(i + offset)
         prc = (i*100.0)/num_pages
@@ -27,6 +28,26 @@ def fnPDF_FindText(pdfDoc, words, offset):
             print(str(prev_prc*25) + '%')
     return res
 
+
+def pdfquery_FindText(filenamme, words, offset):
+    # xfile : the PDF file in which to look
+    # xString : the string to look for
+    res = defaultdict(lambda: set())
+    pdf = pdfquery.PDFQuery(filenamme)
+    page_num = 0
+    while True:
+        try:
+            pdf.load(page_num)
+            for word in words:
+                if pdf.pq(f'LTTextLineHorizontal:contains("{word}")'):
+                    res[word].add(page_num + offset)
+            page_num += 1
+            if page_num % 100 == 0:
+                print(page_num)
+                break
+        except StopIteration:
+            break
+    return res
 
 def raw_index_reader():
     words = []
@@ -55,24 +76,24 @@ def main():
     offset = int(section['Offest'])
 
     clean_index = True
-    words = []
     if not clean_index:
         words = raw_index_reader()
     else:
         words = clean_index_reader()
 
     print('-----')
-    pdfFileObj = open(filename, 'rb')
-    pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
-    results = fnPDF_FindText(pdfReader, words, offset)
-    pdfFileObj.close()
+    pdf_query = True
+    if not pdf_query:
+        pdfFileObj = open(filename, 'rb')
+        pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
+        results = fnPDF_FindText(pdfReader, words, offset)
+        pdfFileObj.close()
+    else:
+        results = pdfquery_FindText(filename, words, offset)
     with open('results.txt', 'w') as f:
         for k in results:
             pages = sorted(list(results[k]))
             if len(pages) != 0:
-                # with open(k + '.txt', 'w') as f:
-                #     for item in pages:
-                #         f.write("%s, " % item)
                 f.write(k + ': ')
                 first_page = -1
                 last_page = -1

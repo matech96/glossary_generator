@@ -1,5 +1,5 @@
 [PDF]
-PDFFileName = Feher hazi eveim_indexhez.pdf # a pdf fájl neve.
+PDFFileName = 01_Kaplan_001-350-461.pdf # a pdf fájl neve.
 Offest = 1 # Mennyivel van elcsúszva az oldalszámozás?
            # Ha nem tudod mennyi csináld a következőt:
            # 1 - Írd az értéket 0-ra (Offest = 0)!
