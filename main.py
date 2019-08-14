@@ -2,7 +2,7 @@ import PyPDF2
 import re
 from collections import defaultdict
 import time
-
+from PreallocatedList import PreallocatedList
 import pdfquery
 import unidecode
 import codecs
@@ -13,7 +13,7 @@ def fnPDF_FindText(pdfDoc, words, offset):
     # xfile : the PDF file in which to look
     # xString : the string to look for
     print(str(0) + '%')
-    res = defaultdict(lambda: set())
+    res = defaultdict(lambda: PreallocatedList(100, int))
     num_pages = pdfDoc.getNumPages()
     prev_prc = 0
     for i in range(0, num_pages):
@@ -21,7 +21,7 @@ def fnPDF_FindText(pdfDoc, words, offset):
         content = re.sub(r'\s+', ' ', content)
         for word in words:
             if unidecode.unidecode(word).lower() in content:
-                res[word].add(i + offset)
+                res[word].append(i + offset)
         prc = (i * 100.0) / num_pages
         if prc > (prev_prc + 1) * 25:
             prev_prc += 1
@@ -32,7 +32,7 @@ def fnPDF_FindText(pdfDoc, words, offset):
 def pdfquery_FindText(filenamme, words, offset):
     # xfile : the PDF file in which to look
     # xString : the string to look for
-    res = defaultdict(lambda: [None] * 100)
+    res = defaultdict(lambda: PreallocatedList(100, int))
     pdf = pdfquery.PDFQuery(filenamme)
     page_num = 0
     # p = Pool(4)
@@ -40,11 +40,13 @@ def pdfquery_FindText(filenamme, words, offset):
         try:
             pdf.load(page_num)
             # res = p.map(lambda word: pdf.pq(f'LTTextLineHorizontal:contains("{word}")'), words)
-            res = [pdf.pq(f'LTTextLineHorizontal:contains("{word}")') for word in words]
-            for r, word in zip(res, words):
-                if r:
-                    res[word].add(page_num + offset)
+            query_objs = [pdf.pq(f'LTTextLineHorizontal:contains("{word}")') for word in words]
+            for query_obj, word in zip(query_objs, words):
+                if query_obj:
+                    res[word].append(page_num + offset)
             page_num += 1
+            # if page_num == 30:
+            #     break
             if page_num % 100 == 0:
                 print(page_num)
         except StopIteration:
@@ -97,7 +99,7 @@ def main():
         results = pdfquery_FindText(filename, words, offset)
     with open('results.txt', 'w') as f:
         for k in results:
-            pages = sorted(list(results[k]))
+            pages = sorted(results[k].tolist())
             if len(pages) != 0:
                 f.write(k + ': ')
                 first_page = -1
