@@ -8,6 +8,7 @@ import unidecode
 import codecs
 import configparser
 import os
+from multiprocessing import Pool
 
 def fnPDF_FindText(pdfDoc, words, offset):
     # xfile : the PDF file in which to look
@@ -32,14 +33,16 @@ def fnPDF_FindText(pdfDoc, words, offset):
 def pdfquery_FindText(filenamme, words, offset):
     # xfile : the PDF file in which to look
     # xString : the string to look for
-    res = defaultdict(lambda: set())
+    res = defaultdict(lambda: [None]*100)
     pdf = pdfquery.PDFQuery(filenamme)
     page_num = 0
+    p = Pool(4)
     while True:
         try:
             pdf.load(page_num)
-            for word in words:
-                if pdf.pq(f'LTTextLineHorizontal:contains("{word}")'):
+            res = p.map(lambda word: pdf.pq(f'LTTextLineHorizontal:contains("{word}")'), words)
+            for r, word in zip(res, words):
+                if r:
                     res[word].add(page_num + offset)
             page_num += 1
             if page_num % 100 == 0:
