@@ -44,7 +44,6 @@ def pdfquery_FindText(filenamme, words, offset):
             page_num += 1
             if page_num % 100 == 0:
                 print(page_num)
-                break
         except StopIteration:
             break
     return res
