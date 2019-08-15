@@ -32,7 +32,7 @@ def fnPDF_FindText(pdfDoc, words, offset):
 def pdfquery_FindText(filenamme, words, offset):
     # xfile : the PDF file in which to look
     # xString : the string to look for
-    res = defaultdict(lambda: PreallocatedList(100, int))
+    res = defaultdict(lambda: PreallocatedList(1000, int))
     pdf = pdfquery.PDFQuery(filenamme)
     page_num = 0
     # p = Pool(4)
